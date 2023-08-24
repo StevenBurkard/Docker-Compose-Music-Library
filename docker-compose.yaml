@@ -1,0 +1,33 @@
+version: '3.0'
+
+services:
+  music-library-database:
+    image: stevenburkard/music-library-database:1.0
+    build: ./database
+    ports:
+      - 3307:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+    restart: always
+    volumes:
+      - db-data:/var/lib/mysql
+
+  music-library-backend:
+    image: stevenburkard/music-library-backend:1.0
+    build: ./backend
+    ports:
+      - 5000:5000
+    restart: always
+    depends_on:
+      - "music-library-database"
+    command: >
+      sh -c "flask db upgrade && flask run --host=0.0.0.0"
+
+  music-library-frontend:
+    image: stevenburkard/music-flask-frontend:1.0
+    build: ./frontend
+    ports:
+      - 3001:3000
+    command: "npm start"
+volumes:
+  db-data:
